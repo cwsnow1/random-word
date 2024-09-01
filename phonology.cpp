@@ -85,6 +85,14 @@ static std::string get_syllable(const phonology::System& s, bool onset,
 
 // Public functions
 
+bool homorganic(const Phone* lhs, const Phone* rhs) {
+  if (lhs->poa == rhs->poa) {
+    return true;
+  }
+  return (lhs->poa == PoA::ALVEOLAR && rhs->poa == PoA::POST_ALVEOLAR) ||
+         (lhs->poa == PoA::POST_ALVEOLAR && rhs->poa == PoA::ALVEOLAR);
+}
+
 Phone get_phone(IPA symbol) { return phones.at(symbol); }
 
 std::string get_word(const phonology::System& s) {

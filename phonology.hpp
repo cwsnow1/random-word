@@ -164,6 +164,7 @@ struct System {
   std::vector<std::vector<std::vector<const Phoneme*>>> codas;
 };
 
+bool homorganic(const Phone* lhs, const Phone* rhs);
 Phone get_phone(IPA symbol);
 std::string get_word(const System& s);
 

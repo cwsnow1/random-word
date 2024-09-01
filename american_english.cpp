@@ -110,9 +110,8 @@ AmericanEnglish::AmericanEnglish() {
       }
     }
   }
-  {
-    // Voiceless fricative except /h/ plus approximant other than /j/
-    // Exception /s/ + /r/ is not possible
+  {  // Voiceless fricative except /h/ plus approximant other than /j/
+     // Exception /s/ + /r/ is not possible
     system.onsets.emplace_back();
     auto fricatives = std::views::all(phons) | std::views::filter(fricative) |
                       std::views::filter(voiceless) |
@@ -132,8 +131,7 @@ AmericanEnglish::AmericanEnglish() {
       }
     }
   }
-  {
-    // /s/ plus voiceless stop
+  {  // /s/ plus voiceless stop
     system.onsets.emplace_back();
     auto s = system.get_phoneme(IPA::s);
     auto stops = std::views::all(phons) | std::views::filter(stop) |
@@ -144,8 +142,7 @@ AmericanEnglish::AmericanEnglish() {
       system.onsets.back().back().push_back(&plosive);
     }
   }
-  {
-    // /s/ plus nasal other than /ŋ/
+  {  // /s/ plus nasal other than /ŋ/
     system.onsets.emplace_back();
     auto s = system.get_phoneme(IPA::s);
     auto nasals = std::views::all(phons) | std::views::filter(nasal) |
@@ -157,8 +154,7 @@ AmericanEnglish::AmericanEnglish() {
     }
   }
   /* I don't believe this rule
-  {
-    // /s/ plus voiceless non-sibilant fricative
+  { // /s/ plus voiceless non-sibilant fricative
     system.onsets.emplace_back();
     auto s = system.get_phoneme(IPA::s);
     auto fricatives =
@@ -172,8 +168,7 @@ AmericanEnglish::AmericanEnglish() {
     }
   }
   */
-  {
-    // /s/ plus voiceless stop plus approximant except /r/
+  {  // /s/ plus voiceless stop plus approximant except /r/
     system.onsets.emplace_back();
     auto s = system.get_phoneme(IPA::s);
     auto stops = std::views::all(phons) | std::views::filter(voiceless) |
@@ -204,8 +199,7 @@ AmericanEnglish::AmericanEnglish() {
   //
   // Codas
   //
-  {
-    // The single consonant phonemes except /h/, /w/, /j/
+  {  // The single consonant phonemes except /h/, /w/, /j/
     system.codas.emplace_back();
     auto candidates = std::views::all(phons) | std::views::filter(consonant) |
                       std::views::filter(except({IPA::h, IPA::w, IPA::j}));
@@ -214,47 +208,100 @@ AmericanEnglish::AmericanEnglish() {
       system.codas.back().back().push_back(&c);
     }
   }
-  {
-    // Lateral approximant plus stop or affricate: /lp/,
-    // /lb/, /lt/, /ld/, /ltʃ/, /ldʒ/, /lk/
+  {  // Lateral approximant plus stop or affricate: /lp/,
+     // /lb/, /lt/, /ld/, /ltʃ/, /ldʒ/, /lk/
     system.codas.emplace_back();
-    auto l = system.get_phoneme(IPA::l);
+    auto start = system.get_phoneme(IPA::l);
     auto candidates = std::views::all(phons) |
                       std::views::filter([stop, affricate](const auto& p) {
                         return stop(p) || affricate(p);
                       });
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
-      system.codas.back().back().push_back(l);
+      system.codas.back().back().push_back(start);
       system.codas.back().back().push_back(&c);
     }
   }
-  {
-    // In rhotic varieties, /r/ plus stop or affricate: /rp/,
-    // /rb/, /rt/, /rd/, /rtʃ/, /rdʒ/, /rk/, /rɡ/
+  {  // In rhotic varieties, /r/ plus stop or affricate: /rp/,
+     // /rb/, /rt/, /rd/, /rtʃ/, /rdʒ/, /rk/, /rɡ/
     system.codas.emplace_back();
-    auto r = system.get_phoneme(IPA::r);
+    auto start = system.get_phoneme(IPA::r);
     auto candidates = std::views::all(phons) |
                       std::views::filter([stop, affricate](const auto& p) {
                         return stop(p) || affricate(p);
                       });
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
-      system.codas.back().back().push_back(r);
+      system.codas.back().back().push_back(start);
       system.codas.back().back().push_back(&c);
     }
   }
-  {
-    // Lateral approximant + fricative except /h/: /lf/, /lv/,
-    // /lθ/, /ls/, /lz/, /lʃ/, (/lð/)
+  {  // Lateral approximant + fricative except /h/: /lf/, /lv/,
+     // /lθ/, /ls/, /lz/, /lʃ/, (/lð/)
     system.codas.emplace_back();
-    auto l = system.get_phoneme(IPA::l);
+    auto start = system.get_phoneme(IPA::l);
     auto candidates = std::views::all(phons) | std::views::filter(fricative) |
                       std::views::filter(except({IPA::h}));
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
-      system.codas.back().back().push_back(l);
+      system.codas.back().back().push_back(start);
       system.codas.back().back().push_back(&c);
+    }
+  }
+  {  // In rhotic varieties, /r/ + fricative: /rf/, /rv/, /rθ/, /rð/, /rs/,
+     // /rz/, /rʃ/
+    system.codas.emplace_back();
+    auto start = system.get_phoneme(IPA::r);
+    auto candidates = std::views::all(phons) | std::views::filter(fricative) |
+                      std::views::filter(except({IPA::h}));
+    for (const auto& c : candidates) {
+      system.codas.back().emplace_back();
+      system.codas.back().back().push_back(start);
+      system.codas.back().back().push_back(&c);
+    }
+  }
+  {  // Lateral approximant + nasal: /lm/, /ln/
+    system.codas.emplace_back();
+    auto start = system.get_phoneme(IPA::l);
+    auto candidates = std::views::all(phons) | std::views::filter(nasal) |
+                      std::views::filter(except({IPA::ŋ}));
+    for (const auto& c : candidates) {
+      system.codas.back().emplace_back();
+      system.codas.back().back().push_back(start);
+      system.codas.back().back().push_back(&c);
+    }
+  }
+  {  // In rhotic varieties, /r/ + nasal or lateral: /rm/, /rn/, /rl/
+    system.codas.emplace_back();
+    auto start = system.get_phoneme(IPA::r);
+    auto candidates = std::views::all(phons) | std::views::filter(nasal) |
+                      std::views::filter(except({IPA::ŋ}));
+    for (const auto& c : candidates) {
+      system.codas.back().emplace_back();
+      system.codas.back().back().push_back(start);
+      system.codas.back().back().push_back(&c);
+    }
+    system.codas.back().emplace_back();
+    system.codas.back().back().push_back(start);
+    system.codas.back().back().push_back(system.get_phoneme(IPA::l));
+  }
+  {  // Nasal + homorganic stop or affricate: /mp/, /nt/, /nd/, /ntʃ/, /ndʒ/,
+     // /ŋk/
+    system.codas.emplace_back();
+    auto start = std::views::all(phons) | std::views::filter(nasal);
+    auto candidates = std::views::all(phons) |
+                      std::views::filter([stop, affricate](const auto& p) {
+                        return stop(p) || affricate(p);
+                      });
+    for (const auto& s : start) {
+      for (const auto& c : candidates) {
+        if (!homorganic(&s.p, &c.p)) {
+          continue;
+        }
+        system.codas.back().emplace_back();
+        system.codas.back().back().push_back(&s);
+        system.codas.back().back().push_back(&c);
+      }
     }
   }
 }
