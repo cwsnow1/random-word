@@ -8,14 +8,6 @@
 
 #include "phonology.hpp"
 
-std::function<bool(const phonology::Phoneme&)> except(
-    const std::vector<phonology::IPA>& exceptions) {
-  return [exceptions](const auto& p) {
-    return std::find(exceptions.begin(), exceptions.end(), p.p.symbol) ==
-           exceptions.end();
-  };
-}
-
 // clang-format off
 
 AmericanEnglish::AmericanEnglish() {
@@ -62,22 +54,6 @@ AmericanEnglish::AmericanEnglish() {
     phons.emplace_back(get_phone(j),  Spelling({"y", "i"}, {}, {}));
   }
 
-  using PFilter = std::function<bool(const Phoneme&)>;
-
-  // Defining helper functions
-  PFilter consonant   = [](const auto& p) { return !p.p.vowel; };
-  PFilter vowel       = [](const auto& p) { return p.p.vowel; };
-  PFilter stop        = [](const auto& p) { return p.p.moa == MoA::PLOSIVE; };
-  PFilter approximant = [](const auto& p) { return p.p.moa == MoA::APPROXIMANT; };
-  PFilter fricative   = [](const auto& p) { return p.p.moa == MoA::FRICATIVE; };
-  PFilter affricate   = [](const auto& p) { return p.p.moa == MoA::AFFRICATE; };
-  PFilter nasal       = [](const auto& p) { return p.p.moa == MoA::NASAL; };
-  PFilter voiced      = [](const auto& p) { return p.p.voiced; };
-  PFilter voiceless   = [](const auto& p) { return !p.p.voiced; };
-  PFilter sibilant    = [](const auto& p) {
-    return (p.p.moa == MoA::FRICATIVE) &&
-           (p.p.poa == PoA::ALVEOLAR || p.p.poa == PoA::POST_ALVEOLAR);
-  };
   // clang-format on
 
   // Constructing possible onsets, nucelei, and codas
@@ -85,7 +61,7 @@ AmericanEnglish::AmericanEnglish() {
     // All single-consonant phonemes except /ŋ/
     system.onsets.emplace_back();
     auto candidates = std::views::all(phons) | std::views::filter(consonant) |
-                      std::views::filter(except({IPA::ŋ}));
+                      std::views::filter(except(IPA::ŋ));
     for (const auto& c : candidates) {
       system.onsets.back().emplace_back();
       system.onsets.back().back().push_back(&c);
@@ -98,7 +74,7 @@ AmericanEnglish::AmericanEnglish() {
     auto stops = std::views::all(phons) | std::views::filter(stop);
     auto approximants = std::views::all(phons) |
                         std::views::filter(approximant) |
-                        std::views::filter(except({IPA::j}));
+                        std::views::filter(except(IPA::j));
     for (const auto& s : stops) {
       for (const auto& a : approximants) {
         if (s.p.poa == a.p.poa) {
@@ -115,10 +91,10 @@ AmericanEnglish::AmericanEnglish() {
     system.onsets.emplace_back();
     auto fricatives = std::views::all(phons) | std::views::filter(fricative) |
                       std::views::filter(voiceless) |
-                      std::views::filter(except({IPA::h}));
+                      std::views::filter(except(IPA::h));
     auto approximants = std::views::all(phons) |
                         std::views::filter(approximant) |
-                        std::views::filter(except({IPA::j}));
+                        std::views::filter(except(IPA::j));
     for (const auto& f : fricatives) {
       for (const auto& a : approximants) {
         if (f.p.poa == a.p.poa ||
@@ -146,21 +122,21 @@ AmericanEnglish::AmericanEnglish() {
     system.onsets.emplace_back();
     auto s = system.get_phoneme(IPA::s);
     auto nasals = std::views::all(phons) | std::views::filter(nasal) |
-                  std::views::filter(except({IPA::ŋ}));
+                  std::views::filter(except(IPA::ŋ));
     for (const auto& n : nasals) {
       system.onsets.back().emplace_back();
       system.onsets.back().back().push_back(s);
       system.onsets.back().back().push_back(&n);
     }
   }
-  /* I don't believe this rule
+  /*
   { // /s/ plus voiceless non-sibilant fricative
     system.onsets.emplace_back();
     auto s = system.get_phoneme(IPA::s);
     auto fricatives =
         std::views::all(phons) | std::views::filter(fricative) |
         std::views::filter(voiceless) |
-        std::views::filter([sibilant](const auto& p) { return !sibilant(p); });
+        std::views::filter([](const auto& p) { return !sibilant(p); });
     for (const auto& f : fricatives) {
       system.onsets.back().emplace_back();
       system.onsets.back().back().push_back(s);
@@ -175,7 +151,7 @@ AmericanEnglish::AmericanEnglish() {
                  std::views::filter(stop);
     auto approximants = std::views::all(phons) |
                         std::views::filter(approximant) |
-                        std::views::filter(except({IPA::r}));
+                        std::views::filter(except(IPA::r));
     for (const auto& plosive : stops) {
       for (const auto& a : approximants) {
         if (plosive.p.poa == a.p.poa) continue;
@@ -212,10 +188,10 @@ AmericanEnglish::AmericanEnglish() {
      // /lb/, /lt/, /ld/, /ltʃ/, /ldʒ/, /lk/
     system.codas.emplace_back();
     auto start = system.get_phoneme(IPA::l);
-    auto candidates = std::views::all(phons) |
-                      std::views::filter([stop, affricate](const auto& p) {
-                        return stop(p) || affricate(p);
-                      });
+    auto candidates =
+        std::views::all(phons) | std::views::filter([](const auto& p) {
+          return stop(p) || affricate(p);
+        });
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
       system.codas.back().back().push_back(start);
@@ -226,10 +202,10 @@ AmericanEnglish::AmericanEnglish() {
      // /rb/, /rt/, /rd/, /rtʃ/, /rdʒ/, /rk/, /rɡ/
     system.codas.emplace_back();
     auto start = system.get_phoneme(IPA::r);
-    auto candidates = std::views::all(phons) |
-                      std::views::filter([stop, affricate](const auto& p) {
-                        return stop(p) || affricate(p);
-                      });
+    auto candidates =
+        std::views::all(phons) | std::views::filter([](const auto& p) {
+          return stop(p) || affricate(p);
+        });
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
       system.codas.back().back().push_back(start);
@@ -241,7 +217,7 @@ AmericanEnglish::AmericanEnglish() {
     system.codas.emplace_back();
     auto start = system.get_phoneme(IPA::l);
     auto candidates = std::views::all(phons) | std::views::filter(fricative) |
-                      std::views::filter(except({IPA::h}));
+                      std::views::filter(except(IPA::h));
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
       system.codas.back().back().push_back(start);
@@ -253,7 +229,7 @@ AmericanEnglish::AmericanEnglish() {
     system.codas.emplace_back();
     auto start = system.get_phoneme(IPA::r);
     auto candidates = std::views::all(phons) | std::views::filter(fricative) |
-                      std::views::filter(except({IPA::h}));
+                      std::views::filter(except(IPA::h));
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
       system.codas.back().back().push_back(start);
@@ -264,7 +240,7 @@ AmericanEnglish::AmericanEnglish() {
     system.codas.emplace_back();
     auto start = system.get_phoneme(IPA::l);
     auto candidates = std::views::all(phons) | std::views::filter(nasal) |
-                      std::views::filter(except({IPA::ŋ}));
+                      std::views::filter(except(IPA::ŋ));
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
       system.codas.back().back().push_back(start);
@@ -275,7 +251,7 @@ AmericanEnglish::AmericanEnglish() {
     system.codas.emplace_back();
     auto start = system.get_phoneme(IPA::r);
     auto candidates = std::views::all(phons) | std::views::filter(nasal) |
-                      std::views::filter(except({IPA::ŋ}));
+                      std::views::filter(except(IPA::ŋ));
     for (const auto& c : candidates) {
       system.codas.back().emplace_back();
       system.codas.back().back().push_back(start);
@@ -289,10 +265,10 @@ AmericanEnglish::AmericanEnglish() {
      // /ŋk/
     system.codas.emplace_back();
     auto start = std::views::all(phons) | std::views::filter(nasal);
-    auto candidates = std::views::all(phons) |
-                      std::views::filter([stop, affricate](const auto& p) {
-                        return stop(p) || affricate(p);
-                      });
+    auto candidates =
+        std::views::all(phons) | std::views::filter([](const auto& p) {
+          return stop(p) || affricate(p);
+        });
     for (const auto& s : start) {
       for (const auto& c : candidates) {
         if (!homorganic(&s.p, &c.p)) {

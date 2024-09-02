@@ -74,10 +74,10 @@ enum class MannerOfArticulation : uint8_t {
 using MoA = MannerOfArticulation;
 
 struct Spelling {
-  std::vector<std::string> onset;
-  std::vector<std::string> nucleus;
-  std::vector<std::string> coda;
-  std::vector<std::string> word_final;
+  const std::vector<std::string> onset;
+  const std::vector<std::string> nucleus;
+  const std::vector<std::string> coda;
+  const std::vector<std::string> word_final;
 
   Spelling() = delete;
 
@@ -164,8 +164,37 @@ struct System {
   std::vector<std::vector<std::vector<const Phoneme*>>> codas;
 };
 
+using phone_filter = std::function<bool(const Phoneme&)>;
+// clang-format off
+// Defining helper functions
+inline bool consonant  (const Phoneme& p) { return !p.p.vowel; }
+inline bool vowel      (const Phoneme& p) { return p.p.vowel; }
+inline bool stop       (const Phoneme& p) { return p.p.moa == MoA::PLOSIVE; }
+inline bool approximant(const Phoneme& p) { return p.p.moa == MoA::APPROXIMANT; }
+inline bool fricative  (const Phoneme& p) { return p.p.moa == MoA::FRICATIVE; }
+inline bool affricate  (const Phoneme& p) { return p.p.moa == MoA::AFFRICATE; }
+inline bool nasal      (const Phoneme& p) { return p.p.moa == MoA::NASAL; }
+inline bool voiced     (const Phoneme& p) { return p.p.voiced; }
+inline bool voiceless  (const Phoneme& p) { return !p.p.voiced; }
+inline bool sibilant   (const Phoneme& p) {
+  return (p.p.moa == MoA::FRICATIVE) &&
+         (p.p.poa == PoA::ALVEOLAR || p.p.poa == PoA::POST_ALVEOLAR);
+}
+// clang-format on
+
+inline phone_filter except(const std::vector<phonology::IPA>& exceptions) {
+  return [exceptions](const auto& p) {
+    return std::find(exceptions.begin(), exceptions.end(), p.p.symbol) ==
+           exceptions.end();
+  };
+}
+
+inline phone_filter except(const phonology::IPA exception) {
+  return [exception](const auto& p) { return p.p.symbol != exception; };
+}
+
 bool homorganic(const Phone* lhs, const Phone* rhs);
 Phone get_phone(IPA symbol);
-std::string get_word(const System& s);
+std::string get_word(const System& s, int max_num_syllables);
 
 };  // namespace phonology

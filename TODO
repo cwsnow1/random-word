@@ -1,0 +1,2 @@
+Make spelling consider sequences of phonemes, e.g. /kw/ -> "qu", /ju/ -> "u"
+Make certain clusters and spellings less likely than others

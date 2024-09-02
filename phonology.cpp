@@ -95,9 +95,25 @@ bool homorganic(const Phone* lhs, const Phone* rhs) {
 
 Phone get_phone(IPA symbol) { return phones.at(symbol); }
 
-std::string get_word(const phonology::System& s) {
-  return get_syllable(s, true, false, false) +
-         get_syllable(s, true, true, true);
+std::string get_word(const phonology::System& s, int max_num_syllables) {
+  int num_syllables = (rand() % max_num_syllables) + 1;
+  std::string word;
+  bool prev_onset = false;
+  bool prev_coda = false;
+  for (int i = 0; i < num_syllables; ++i) {
+    bool coda = false;
+    bool onset = !prev_coda;
+    if (i == 0) {
+      onset = rand() % 8;
+    }
+    if (!prev_onset) {
+      coda = rand() % 2;
+    }
+    word += get_syllable(s, onset, coda, i == num_syllables - 1);
+    prev_onset = onset;
+    prev_coda = coda;
+  }
+  return word;
 }
 
 }  // namespace phonology
