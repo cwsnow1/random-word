@@ -11,77 +11,60 @@ namespace phonology {
 
 static const std::unordered_map<IPA, const Phone> phones = {
     // clang-format off
-    {IPA::ɑ,  Phone(IPA::ɑ)},  {IPA::æ,  Phone(IPA::æ)},
-    {IPA::aɪ, Phone(IPA::aɪ)}, {IPA::aʊ, Phone(IPA::aʊ)},
-    {IPA::ɛ,  Phone(IPA::ɛ)},  {IPA::eɪ, Phone(IPA::eɪ)},
-    {IPA::ɪ,  Phone(IPA::ɪ)},  {IPA::i,  Phone(IPA::i)},
-    {IPA::oʊ, Phone(IPA::oʊ)}, {IPA::ɔɪ, Phone(IPA::ɔɪ)},
-    {IPA::ʊ,  Phone(IPA::ʊ)},  {IPA::ə,  Phone(IPA::ə)},
-    {IPA::u,  Phone(IPA::u)},
-    {IPA::m,  Phone(IPA::m,  true,  MoA::NASAL,       PoA::LABIAL)},
-    {IPA::n,  Phone(IPA::n,  true,  MoA::NASAL,       PoA::ALVEOLAR)},
-    {IPA::ŋ,  Phone(IPA::ŋ,  true,  MoA::NASAL,       PoA::VELAR)},
-    {IPA::p,  Phone(IPA::p,  false, MoA::PLOSIVE,     PoA::LABIAL)},
-    {IPA::t,  Phone(IPA::t,  false, MoA::PLOSIVE,     PoA::ALVEOLAR)},
-    {IPA::tʃ, Phone(IPA::tʃ, false, MoA::AFFRICATE,   PoA::POST_ALVEOLAR)},
-    {IPA::k,  Phone(IPA::k,  false, MoA::PLOSIVE,     PoA::VELAR)},
-    {IPA::b,  Phone(IPA::b,  true,  MoA::PLOSIVE,     PoA::LABIAL)},
-    {IPA::d,  Phone(IPA::d,  true,  MoA::PLOSIVE,     PoA::ALVEOLAR)},
-    {IPA::dʒ, Phone(IPA::dʒ, true,  MoA::AFFRICATE,   PoA::POST_ALVEOLAR)},
-    {IPA::g,  Phone(IPA::g,  true,  MoA::PLOSIVE,     PoA::VELAR)},
-    {IPA::f,  Phone(IPA::f,  false, MoA::FRICATIVE,   PoA::LABIAL)},
-    {IPA::θ,  Phone(IPA::θ,  false, MoA::FRICATIVE,   PoA::DENTAL)},
-    {IPA::s,  Phone(IPA::s,  false, MoA::FRICATIVE,   PoA::ALVEOLAR)},
-    {IPA::ʃ,  Phone(IPA::ʃ,  false, MoA::FRICATIVE,   PoA::POST_ALVEOLAR)},
-    {IPA::h,  Phone(IPA::h,  false, MoA::FRICATIVE,   PoA::GLOTTAL)},
-    {IPA::v,  Phone(IPA::v,  true,  MoA::FRICATIVE,   PoA::LABIAL)},
-    {IPA::ð,  Phone(IPA::ð,  true,  MoA::FRICATIVE,   PoA::DENTAL)},
-    {IPA::z,  Phone(IPA::z,  true,  MoA::FRICATIVE,   PoA::ALVEOLAR)},
-    {IPA::ʒ,  Phone(IPA::ʒ,  true,  MoA::FRICATIVE,   PoA::POST_ALVEOLAR)},
-    {IPA::w,  Phone(IPA::w,  true,  MoA::APPROXIMANT, PoA::LABIAL)},
-    {IPA::l,  Phone(IPA::l,  true,  MoA::APPROXIMANT, PoA::ALVEOLAR)},
-    {IPA::r,  Phone(IPA::r,  true,  MoA::APPROXIMANT, PoA::POST_ALVEOLAR)},
-    {IPA::j,  Phone(IPA::j,  true,  MoA::APPROXIMANT, PoA::PALATAL)},
+    {IPA::a,  Phone(IPA::a,  VR::UNROUNDED, VH::OPEN,         VB::FRONT,   VN::ORAL)},
+    {IPA::aɪ, Phone(IPA::aɪ, VR::UNROUNDED, VH::OPEN,         VB::FRONT,   VN::ORAL)},
+    {IPA::aʊ, Phone(IPA::aʊ, VR::UNROUNDED, VH::OPEN,         VB::FRONT,   VN::ORAL)},
+    {IPA::æ,  Phone(IPA::æ,  VR::UNROUNDED, VH::NEAR_OPEN,    VB::FRONT,   VN::ORAL)},
+    {IPA::ɛ,  Phone(IPA::ɛ,  VR::UNROUNDED, VH::OPEN_MID,     VB::FRONT,   VN::ORAL)},
+    {IPA::ɛ̃,  Phone(IPA::ɛ̃,  VR::UNROUNDED, VH::OPEN_MID,     VB::FRONT,   VN::NASAL)},
+    {IPA::œ,  Phone(IPA::œ,  VR::ROUNDED,   VH::OPEN_MID,     VB::FRONT,   VN::ORAL)},
+    {IPA::e,  Phone(IPA::e,  VR::UNROUNDED, VH::CLOSE_MID,    VB::FRONT,   VN::ORAL)},
+    {IPA::eɪ, Phone(IPA::eɪ, VR::UNROUNDED, VH::CLOSE_MID,    VB::FRONT,   VN::ORAL)},
+    {IPA::ø,  Phone(IPA::ø,  VR::ROUNDED,   VH::CLOSE_MID,    VB::FRONT,   VN::ORAL)},
+    {IPA::ɪ,  Phone(IPA::ɪ,  VR::UNROUNDED, VH::NEAR_CLOSE,   VB::FRONT,   VN::ORAL)},
+    {IPA::i,  Phone(IPA::i,  VR::UNROUNDED, VH::CLOSE,        VB::FRONT,   VN::ORAL)},
+    {IPA::y,  Phone(IPA::y,  VR::ROUNDED,   VH::CLOSE,        VB::FRONT,   VN::ORAL)},
+    {IPA::ɑ,  Phone(IPA::ɑ,  VR::UNROUNDED, VH::OPEN,         VB::BACK,    VN::ORAL)},
+    {IPA::ɑ̃,  Phone(IPA::ɑ̃,  VR::UNROUNDED, VH::OPEN,         VB::BACK,    VN::NASAL)},
+    {IPA::ɔ,  Phone(IPA::ɔ,  VR::ROUNDED,   VH::OPEN_MID,     VB::BACK,    VN::ORAL)},
+    {IPA::ɔ̃,  Phone(IPA::ɔ̃,  VR::ROUNDED,   VH::OPEN_MID,     VB::BACK,    VN::NASAL)},
+    {IPA::ɔɪ, Phone(IPA::ɔɪ, VR::ROUNDED,   VH::OPEN_MID,     VB::BACK,    VN::ORAL)},
+    {IPA::o,  Phone(IPA::o,  VR::ROUNDED,   VH::CLOSE_MID,    VB::BACK,    VN::ORAL)},
+    {IPA::oʊ, Phone(IPA::oʊ, VR::ROUNDED,   VH::CLOSE_MID,    VB::BACK,    VN::ORAL)},
+    {IPA::ʊ,  Phone(IPA::ʊ,  VR::ROUNDED,   VH::NEAR_CLOSE,   VB::BACK,    VN::ORAL)},
+    {IPA::ə,  Phone(IPA::ə,  VR::UNROUNDED, VH::MID,          VB::CENTRAL, VN::ORAL)},
+    {IPA::u,  Phone(IPA::u,  VR::ROUNDED,   VH::CLOSE,        VB::BACK,    VN::ORAL)},
+    {IPA::m,  Phone(IPA::m,  CV::VOICED,    MoA::NASAL,       PoA::LABIAL)},
+    {IPA::n,  Phone(IPA::n,  CV::VOICED,    MoA::NASAL,       PoA::ALVEOLAR)},
+    {IPA::ɲ,  Phone(IPA::ɲ,  CV::VOICED,    MoA::NASAL,       PoA::PALATAL)},
+    {IPA::ŋ,  Phone(IPA::ŋ,  CV::VOICED,    MoA::NASAL,       PoA::VELAR)},
+    {IPA::p,  Phone(IPA::p,  CV::VOICELESS, MoA::PLOSIVE,     PoA::LABIAL)},
+    {IPA::t,  Phone(IPA::t,  CV::VOICELESS, MoA::PLOSIVE,     PoA::ALVEOLAR)},
+    {IPA::tʃ, Phone(IPA::tʃ, CV::VOICELESS, MoA::AFFRICATE,   PoA::POST_ALVEOLAR)},
+    {IPA::k,  Phone(IPA::k,  CV::VOICELESS, MoA::PLOSIVE,     PoA::VELAR)},
+    {IPA::b,  Phone(IPA::b,  CV::VOICED,    MoA::PLOSIVE,     PoA::LABIAL)},
+    {IPA::d,  Phone(IPA::d,  CV::VOICED,    MoA::PLOSIVE,     PoA::ALVEOLAR)},
+    {IPA::dʒ, Phone(IPA::dʒ, CV::VOICED,    MoA::AFFRICATE,   PoA::POST_ALVEOLAR)},
+    {IPA::g,  Phone(IPA::g,  CV::VOICED,    MoA::PLOSIVE,     PoA::VELAR)},
+    {IPA::f,  Phone(IPA::f,  CV::VOICELESS, MoA::FRICATIVE,   PoA::LABIAL)},
+    {IPA::θ,  Phone(IPA::θ,  CV::VOICELESS, MoA::FRICATIVE,   PoA::DENTAL)},
+    {IPA::s,  Phone(IPA::s,  CV::VOICELESS, MoA::FRICATIVE,   PoA::ALVEOLAR)},
+    {IPA::ʃ,  Phone(IPA::ʃ,  CV::VOICELESS, MoA::FRICATIVE,   PoA::POST_ALVEOLAR)},
+    {IPA::h,  Phone(IPA::h,  CV::VOICELESS, MoA::FRICATIVE,   PoA::GLOTTAL)},
+    {IPA::v,  Phone(IPA::v,  CV::VOICED,    MoA::FRICATIVE,   PoA::LABIAL)},
+    {IPA::ð,  Phone(IPA::ð,  CV::VOICED,    MoA::FRICATIVE,   PoA::DENTAL)},
+    {IPA::z,  Phone(IPA::z,  CV::VOICED,    MoA::FRICATIVE,   PoA::ALVEOLAR)},
+    {IPA::ʒ,  Phone(IPA::ʒ,  CV::VOICED,    MoA::FRICATIVE,   PoA::POST_ALVEOLAR)},
+    {IPA::w,  Phone(IPA::w,  CV::VOICED,    MoA::APPROXIMANT, PoA::LABIAL)},
+    {IPA::l,  Phone(IPA::l,  CV::VOICED,    MoA::APPROXIMANT, PoA::ALVEOLAR)},
+    {IPA::ɹ,  Phone(IPA::ɹ,  CV::VOICED,    MoA::APPROXIMANT, PoA::POST_ALVEOLAR)},
+    {IPA::ɥ,  Phone(IPA::ɥ,  CV::VOICED,    MoA::APPROXIMANT, PoA::PALATAL)},
+    {IPA::ʁ̞,  Phone(IPA::ʁ̞,  CV::VOICED,    MoA::APPROXIMANT, PoA::UVULAR)},
+    {IPA::j,  Phone(IPA::j,  CV::VOICED,    MoA::APPROXIMANT, PoA::PALATAL)},
     // clang-format on
 };
 
 // Private functions
-
-static std::string get_onset(const phonology::System& s) {
-  auto i = rand() % s.onsets.size();
-  auto j = rand() % s.onsets[i].size();
-  std::string onset;
-  for (const auto& phoneme : s.onsets[i][j]) {
-    onset += phoneme->get_onset_spelling();
-  }
-  return onset;
-}
-
-static std::string get_nucleus(const phonology::System& s) {
-  auto i = rand() % s.nuclei.size();
-  auto j = rand() % s.nuclei[i].size();
-  return s.nuclei[i][j]->get_nucleus_spelling();
-}
-
-static std::string get_coda(const phonology::System& s, bool final) {
-  auto i = rand() % s.codas.size();
-  auto j = rand() % s.codas[i].size();
-  std::string coda;
-  for (std::size_t k = 0; k < s.codas[i][j].size() - 1; ++k) {
-    coda += s.codas[i][j][k]->get_coda_spelling(false);
-  }
-  coda += s.codas[i][j].back()->get_coda_spelling(final);
-  return coda;
-}
-
-static std::string get_syllable(const phonology::System& s, bool onset,
-                                bool coda, bool final) {
-  std::string syllable;
-  if (onset) syllable += get_onset(s);
-  syllable += get_nucleus(s);
-  if (coda) syllable += get_coda(s, final);
-  return syllable;
-}
 
 // Public functions
 
@@ -94,26 +77,5 @@ bool homorganic(const Phone* lhs, const Phone* rhs) {
 }
 
 Phone get_phone(IPA symbol) { return phones.at(symbol); }
-
-std::string get_word(const phonology::System& s, int max_num_syllables) {
-  int num_syllables = (rand() % max_num_syllables) + 1;
-  std::string word;
-  bool prev_onset = false;
-  bool prev_coda = false;
-  for (int i = 0; i < num_syllables; ++i) {
-    bool coda = false;
-    bool onset = !prev_coda;
-    if (i == 0) {
-      onset = rand() % 8;
-    }
-    if (!prev_onset) {
-      coda = rand() % 2;
-    }
-    word += get_syllable(s, onset, coda, i == num_syllables - 1);
-    prev_onset = onset;
-    prev_coda = coda;
-  }
-  return word;
-}
 
 }  // namespace phonology
