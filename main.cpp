@@ -2,6 +2,7 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <string>
 
 #include "metropolitan_french.hpp"
 #include "phonology.hpp"

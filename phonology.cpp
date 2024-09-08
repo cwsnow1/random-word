@@ -1,11 +1,8 @@
 #include "phonology.hpp"
 
 #include <cassert>
-#include <cstddef>
 #include <cstdlib>
-#include <string>
 #include <unordered_map>
-#include <vector>
 
 namespace phonology {
 

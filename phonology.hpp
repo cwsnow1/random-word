@@ -165,7 +165,7 @@ struct Spelling {
   const std::string spelling;
   const SpellingRule rule;
   Spelling() = delete;
-  Spelling(std::string spelling, SpellingRule&& rule) : spelling(spelling), rule(rule) {}
+  Spelling(std::string&& spelling, SpellingRule&& rule) : spelling(spelling), rule(rule) {}
 };
 
 struct Phoneme {

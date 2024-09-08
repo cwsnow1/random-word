@@ -1,5 +1,11 @@
 #include "metropolitan_french.hpp"
 
+#include <cstddef>
+#include <cstdlib>
+#include <ranges>
+#include <string>
+#include <vector>
+
 #include "phonology.hpp"
 
 namespace phonology {
@@ -242,21 +248,17 @@ void MetropolitanFrench::init_phonemes() {
                                                               }}}));
 
   phonemes.emplace_back(
-      get_phone(j),
-      std::vector<Spelling>(
-          {{"i", [](Spelling::RuleParams rp) { return not_word_initial(rp) && before_vowel(rp); }},
-           {"y", word_initial},
-           {"il",
-            [](Spelling::RuleParams rp) {
-              return rp.prev && rp.prev->vowel &&
-                     (rp.prev->height == VH::MID || rp.prev->height == VH::CLOSE_MID ||
-                      rp.prev->height == VH::OPEN_MID);
-            }},
-           {"ille", [](Spelling::RuleParams rp) {
-              return rp.prev && !rp.next && rp.prev->vowel &&
-                     (rp.prev->height == VH::MID || rp.prev->height == VH::CLOSE_MID ||
-                      rp.prev->height == VH::OPEN_MID);
-            }}}));
+      get_phone(j), std::vector<Spelling>(
+                        {{"i", [](Spelling::RuleParams rp) { return not_word_initial(rp); }},
+                         {"y", word_initial},
+                         {"il",
+                          [](Spelling::RuleParams rp) {
+                            return rp.prev && rp.prev->vowel && (rp.prev->backness == VB::FRONT);
+                          }},
+                         {"ille", [](Spelling::RuleParams rp) {
+                            return rp.prev && !rp.next && rp.prev->vowel &&
+                                   (rp.prev->backness == VB::FRONT);
+                          }}}));
 
   phonemes.emplace_back(get_phone(ɥ),
                         std::vector<Spelling>({{"u", not_word_initial}, {"hu", word_initial}}));
