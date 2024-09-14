@@ -1,283 +1,443 @@
 #include "american_english.hpp"
 
 #include <cstdlib>
-#include <functional>
 #include <ranges>
 #include <string>
 #include <vector>
 
 #include "phonology.hpp"
 
-// clang-format off
+namespace phonology {
 
-AmericanEnglish::AmericanEnglish() {
-  using namespace phonology;
-  auto& phons = system.phonemes;
-  {
-    using enum IPA;
-    phons.emplace_back(get_phone(æ),  Spelling({"a"}));
-    phons.emplace_back(get_phone(ɑ),  Spelling({"o", "al", "au", "aw", /* "ough", "augh" */}));
-    phons.emplace_back(get_phone(ɪ),  Spelling({"i", /*"y"*/}));
-    phons.emplace_back(get_phone(ɛ),  Spelling({"e", "ea"}));
-    phons.emplace_back(get_phone(ə),  Spelling({"a", "e", "o", "u", "ou"}));
-    phons.emplace_back(get_phone(ʊ),  Spelling({"u", "oo", "o"}));
-    phons.emplace_back(get_phone(eɪ), Spelling({"a", "ai", "ay"}));
-    phons.emplace_back(get_phone(oʊ), Spelling({"o", "oa", "ow"}));
-    phons.emplace_back(get_phone(i),  Spelling({"e", "ea", "ee", "y"}));
-    phons.emplace_back(get_phone(u),  Spelling({"u", "oo", "ew"}));
-    phons.emplace_back(get_phone(aɪ), Spelling({"i", "y", "igh"}));
-    phons.emplace_back(get_phone(ɔɪ), Spelling({"oi", "oy"}));
-    phons.emplace_back(get_phone(aʊ), Spelling({"ou", "ow"}));
-    phons.emplace_back(get_phone(m),  Spelling({"m"}, {"m", "mm"}, {"m", "me"}));
-    phons.emplace_back(get_phone(n),  Spelling({"n"}, {"n", "nn"}, {"n", "ne"}));
-    phons.emplace_back(get_phone(ŋ),  Spelling({}, {"ng"}, {"ng"}));
-    phons.emplace_back(get_phone(p),  Spelling({"p"}, {"p", "pp"}, {"p", "pe", /*"pp"*/}));
-    phons.emplace_back(get_phone(t),  Spelling({"t"}, {"t", "tt"}, {"t", "te"}));
-    phons.emplace_back(get_phone(tʃ), Spelling({"ch"}, {"ch", "tch"}, {"ch", "tch"}));
-    phons.emplace_back(get_phone(k),  Spelling({"c", "k"}, {"c", "k", "ck"}, {"k", "ke", "ck"}));
-    phons.emplace_back(get_phone(b),  Spelling({"b"}, {"b", "bb"}, {"b", "be"}));
-    phons.emplace_back(get_phone(d),  Spelling({"d"}, {"d", "dd"}, {"d", "de"}));
-    phons.emplace_back(get_phone(dʒ), Spelling({"j"}, {"j", "dge"}, {"ge", "dge"}));
-    phons.emplace_back(get_phone(g),  Spelling({"g"}, {"g", "gg"}, {"g", "gg"}));
-    phons.emplace_back(get_phone(f),  Spelling({"f", "ph"}, {"f", "f", "ph"}, {"f", "fe", "ph"}));
-    phons.emplace_back(get_phone(θ),  Spelling({"th"}, {"th"}, {"th"}));
-    phons.emplace_back(get_phone(s),  Spelling({"s"}, {"s", "ss"}, {"s", "ss", "ce"}));
-    phons.emplace_back(get_phone(ʃ),  Spelling({"sh"}, {"sh"}, {"sh"}));
-    phons.emplace_back(get_phone(v),  Spelling({"v"}, {"v"}, {"v", "ve"}));
-    phons.emplace_back(get_phone(ð),  Spelling({"th"}, {"th"}, {"th", "the"}));
-    phons.emplace_back(get_phone(z),  Spelling({"z"}, {"z", "s"}, {"z", "s"}));
-    phons.emplace_back(get_phone(ʒ),  Spelling({"j"}, {"si", "s", "ge"}, {"ge"}));
-    phons.emplace_back(get_phone(h),  Spelling({"h"}, {}, {}));
-    phons.emplace_back(get_phone(w),  Spelling({"w"}, {}, {}));
-    phons.emplace_back(get_phone(l),  Spelling({"l"}, {"l"}, {"ll", "l"}));
-    phons.emplace_back(get_phone(r),  Spelling({"r"}, {"r"}, {"r"}));
-    phons.emplace_back(get_phone(j),  Spelling({"y", "i"}, {}, {}));
-  }
+static bool before_i_or_e(Spelling::RuleParams rp) {
+  return rp.next && rp.next->vowel && rp.next->rounded == VR::UNROUNDED &&
+         (rp.next->height == VH::CLOSE || rp.next->height == VH::CLOSE_MID ||
+          rp.next->height == VH::MID || rp.next->height == VH::OPEN_MID);
+}
 
-  // clang-format on
+static bool not_before_i_or_e(Spelling::RuleParams rp) { return !before_i_or_e(rp); }
 
-  // Constructing possible onsets, nucelei, and codas
+void AmericanEnglish::init_phonemes() {
+  using enum IPA;
+  phonemes.emplace_back(get_phone(æ), std::vector<Spelling>{{"a", any_position}});
+  phonemes.emplace_back(get_phone(ɑ), std::vector<Spelling>{{"o", any_position},
+                                                            {"al", mid_word},
+                                                            {"au", not_word_final},
+                                                            {"aw", any_position},
+                                                            {"ough", word_final},
+                                                            {"augh", word_final}});
+  phonemes.emplace_back(get_phone(ɪ), std::vector<Spelling>{{"i", any_position}});
+  phonemes.emplace_back(get_phone(ɛ), std::vector<Spelling>{{"e", any_position}, {"ea", mid_word}});
+  phonemes.emplace_back(get_phone(ə), std::vector<Spelling>{{"a", any_position},
+                                                            {"e", not_word_final},
+                                                            {"o", not_word_final},
+                                                            {"u", not_word_final},
+                                                            {"ou", not_word_final}});
+  phonemes.emplace_back(
+      get_phone(ʊ),
+      std::vector<Spelling>{{"u", not_word_final}, {"oo", mid_word}, {"o", mid_word}});
+  phonemes.emplace_back(
+      get_phone(eɪ),
+      std::vector<Spelling>{{"a", mid_word}, {"ai", not_word_final}, {"ay", not_word_initial}});
+  phonemes.emplace_back(
+      get_phone(oʊ),
+      std::vector<Spelling>{{"o", any_position}, {"oa", any_position}, {"ow", any_position}});
+  phonemes.emplace_back(
+      get_phone(i),
+      std::vector<Spelling>{
+          {"e", mid_word}, {"ea", any_position}, {"ee", not_word_initial}, {"y", word_final}});
+  phonemes.emplace_back(get_phone(u), std::vector<Spelling>{{"u", not_word_final},
+                                                            {"oo", not_word_initial},
+                                                            {"ew", any_position},
+                                                            {"ue", word_final}});
+  phonemes.emplace_back(
+      get_phone(aɪ), std::vector<Spelling>{
+                         {"i", any_position}, {"y", not_word_initial}, {"igh", not_word_initial}});
+  phonemes.emplace_back(get_phone(ɔɪ),
+                        std::vector<Spelling>{{"oi", not_word_final}, {"oy", any_position}});
+  phonemes.emplace_back(get_phone(aʊ),
+                        std::vector<Spelling>{{"ou", not_word_final}, {"ow", any_position}});
+
+  phonemes.emplace_back(
+      get_phone(m),
+      std::vector<Spelling>{
+          {"m", any_position},
+          {"mm", [](const Spelling::RuleParams& rp) { return not_in_cluster(rp) && is_coda(rp); }},
+          {"me", word_final}});
+  phonemes.emplace_back(
+      get_phone(n),
+      std::vector<Spelling>{
+          {"n", any_position},
+          {"nn", [](const Spelling::RuleParams& rp) { return not_in_cluster(rp) && is_coda(rp); }},
+          {"ne", word_final}});
+  phonemes.emplace_back(get_phone(ŋ),
+                        std::vector<Spelling>{{"ng", not_in_cluster}, {"n", in_cluster}});
+
+  phonemes.emplace_back(
+      get_phone(p),
+      std::vector<Spelling>{
+          {"p", any_position},
+          {"pp", [](const Spelling::RuleParams& rp) { return not_in_cluster(rp) && is_coda(rp); }},
+          {"pe", word_final}});
+
+  phonemes.emplace_back(
+      get_phone(t),
+      std::vector<Spelling>{
+          {"t", any_position},
+          {"tt", [](const Spelling::RuleParams& rp) { return not_in_cluster(rp) && is_coda(rp); }},
+          {"te", word_final}});
+
+  phonemes.emplace_back(get_phone(tʃ),
+                        std::vector<Spelling>{{"ch", any_position}, {"tch", is_coda}});
+
+  phonemes.emplace_back(get_phone(tʃ),
+                        std::vector<Spelling>{{"ch", any_position}, {"tch", is_coda}});
+  phonemes.emplace_back(
+      get_phone(k),
+      std::vector<Spelling>{
+          {"c", not_before_i_or_e}, {"k", before_i_or_e}, {"ck", is_coda}, {"ke", word_final}});
+
+  phonemes.emplace_back(
+      get_phone(k),
+      std::vector<Spelling>{
+          {"c", not_before_i_or_e}, {"k", before_i_or_e}, {"ck", is_coda}, {"ke", word_final}});
+  phonemes.emplace_back(
+      get_phone(b),
+      std::vector<Spelling>{
+          {"b", any_position},
+          {"bb", [](const Spelling::RuleParams& rp) { return not_in_cluster(rp) && is_coda(rp); }},
+          {"be", word_final}});
+  phonemes.emplace_back(
+      get_phone(d),
+      std::vector<Spelling>{
+          {"d", any_position},
+          {"dd", [](const Spelling::RuleParams& rp) { return not_in_cluster(rp) && is_coda(rp); }},
+          {"de", word_final}});
+
+  phonemes.emplace_back(
+      get_phone(dʒ),
+      std::vector<Spelling>{
+          {"j", is_onset}, {"g", before_i_or_e}, {"ge", word_final}, {"dge", word_final}});
+  phonemes.emplace_back(get_phone(g), std::vector<Spelling>{{"g", any_position}, {"gg", is_coda}});
+  phonemes.emplace_back(
+      get_phone(f),
+      std::vector<Spelling>{
+          {"f", [](Spelling::RuleParams rp) { return !(in_cluster(rp) && before_vowel(rp)); }},
+          {"ph", [](Spelling::RuleParams rp) { return !(in_cluster(rp) && !before_vowel(rp)); }},
+          {"fe", word_final}});
+
+  phonemes.emplace_back(get_phone(θ), std::vector<Spelling>{{"th", any_position}});
+  phonemes.emplace_back(
+      get_phone(s),
+      std::vector<Spelling>{
+          {"s", any_position},
+          {"ss", [](const Spelling::RuleParams& rp) { return not_in_cluster(rp) && is_coda(rp); }},
+          {"ce", word_final}});
+  phonemes.emplace_back(get_phone(ʃ), std::vector<Spelling>{{"sh", any_position}});
+  phonemes.emplace_back(get_phone(v),
+                        std::vector<Spelling>{{"v", not_word_final}, {"ve", word_final}});
+  phonemes.emplace_back(get_phone(ð),
+                        std::vector<Spelling>{{"th", any_position}, {"the", word_final}});
+  phonemes.emplace_back(get_phone(z),
+                        std::vector<Spelling>{{"z", any_position}, {"ze", word_final}});
+  phonemes.emplace_back(get_phone(ʒ),
+                        std::vector<Spelling>{{"j", is_onset}, {"si", mid_word}, {"ge", is_coda}});
+  phonemes.emplace_back(get_phone(h), std::vector<Spelling>{{"h", any_position}});
+  phonemes.emplace_back(get_phone(w), std::vector<Spelling>{{"w", any_position}});
+  phonemes.emplace_back(
+      get_phone(l),
+      std::vector<Spelling>{
+          {"l", any_position},
+          {"ll", [](const Spelling::RuleParams& rp) { return not_in_cluster(rp) && is_coda(rp); }},
+          {"le", word_final}});
+  phonemes.emplace_back(get_phone(ɹ), std::vector<Spelling>{{"r", any_position}});
+  phonemes.emplace_back(get_phone(j), std::vector<Spelling>{{"y", any_position}});
+}
+
+void AmericanEnglish::init_onsets() {
   {
     // All single-consonant phonemes except /ŋ/
-    system.onsets.emplace_back();
-    auto candidates = std::views::all(phons) | std::views::filter(consonant) |
+    onsets.emplace_back();
+    auto candidates = std::views::all(phonemes) | std::views::filter(consonant) |
                       std::views::filter(except(IPA::ŋ));
     for (const auto& c : candidates) {
-      system.onsets.back().emplace_back();
-      system.onsets.back().back().push_back(&c);
+      onsets.back().emplace_back();
+      onsets.back().back().push_back(&c);
     }
   }
 
   {
     // Stop plus approximant other than /j/
-    system.onsets.emplace_back();
-    auto stops = std::views::all(phons) | std::views::filter(stop);
-    auto approximants = std::views::all(phons) |
-                        std::views::filter(approximant) |
+    onsets.emplace_back();
+    auto stops = std::views::all(phonemes) | std::views::filter(stop);
+    auto approximants = std::views::all(phonemes) | std::views::filter(approximant) |
                         std::views::filter(except(IPA::j));
     for (const auto& s : stops) {
       for (const auto& a : approximants) {
         if (s.p.poa == a.p.poa) {
           continue;
         }
-        system.onsets.back().emplace_back();
-        system.onsets.back().back().push_back(&s);
-        system.onsets.back().back().push_back(&a);
+        onsets.back().emplace_back();
+        onsets.back().back().push_back(&s);
+        onsets.back().back().push_back(&a);
       }
     }
   }
   {  // Voiceless fricative except /h/ plus approximant other than /j/
      // Exception /s/ + /r/ is not possible
-    system.onsets.emplace_back();
-    auto fricatives = std::views::all(phons) | std::views::filter(fricative) |
-                      std::views::filter(voiceless) |
-                      std::views::filter(except(IPA::h));
-    auto approximants = std::views::all(phons) |
-                        std::views::filter(approximant) |
+    onsets.emplace_back();
+    auto fricatives = std::views::all(phonemes) | std::views::filter(fricative) |
+                      std::views::filter(voiceless) | std::views::filter(except(IPA::h));
+    auto approximants = std::views::all(phonemes) | std::views::filter(approximant) |
                         std::views::filter(except(IPA::j));
     for (const auto& f : fricatives) {
       for (const auto& a : approximants) {
-        if (f.p.poa == a.p.poa ||
-            (f.p.symbol == IPA::s && a.p.symbol == IPA::r)) {
+        if (f.p.poa == a.p.poa || (f.p.symbol == IPA::s && a.p.symbol == IPA::ɹ)) {
           continue;
         }
-        system.onsets.back().emplace_back();
-        system.onsets.back().back().push_back(&f);
-        system.onsets.back().back().push_back(&a);
+        onsets.back().emplace_back();
+        onsets.back().back().push_back(&f);
+        onsets.back().back().push_back(&a);
       }
     }
   }
   {  // /s/ plus voiceless stop
-    system.onsets.emplace_back();
-    auto s = system.get_phoneme(IPA::s);
-    auto stops = std::views::all(phons) | std::views::filter(stop) |
-                 std::views::filter(voiceless);
+    onsets.emplace_back();
+    auto s = get_phoneme(IPA::s);
+    auto stops =
+        std::views::all(phonemes) | std::views::filter(stop) | std::views::filter(voiceless);
     for (const auto& plosive : stops) {
-      system.onsets.back().emplace_back();
-      system.onsets.back().back().push_back(s);
-      system.onsets.back().back().push_back(&plosive);
+      onsets.back().emplace_back();
+      onsets.back().back().push_back(s);
+      onsets.back().back().push_back(&plosive);
     }
   }
   {  // /s/ plus nasal other than /ŋ/
-    system.onsets.emplace_back();
-    auto s = system.get_phoneme(IPA::s);
-    auto nasals = std::views::all(phons) | std::views::filter(nasal) |
+    onsets.emplace_back();
+    auto s = get_phoneme(IPA::s);
+    auto nasals = std::views::all(phonemes) | std::views::filter(nasal_c) |
                   std::views::filter(except(IPA::ŋ));
     for (const auto& n : nasals) {
-      system.onsets.back().emplace_back();
-      system.onsets.back().back().push_back(s);
-      system.onsets.back().back().push_back(&n);
+      onsets.back().emplace_back();
+      onsets.back().back().push_back(s);
+      onsets.back().back().push_back(&n);
     }
   }
   /*
   { // /s/ plus voiceless non-sibilant fricative
-    system.onsets.emplace_back();
-    auto s = system.get_phoneme(IPA::s);
+    onsets.emplace_back();
+    auto s = get_phoneme(IPA::s);
     auto fricatives =
-        std::views::all(phons) | std::views::filter(fricative) |
+        std::views::all(phonemes) | std::views::filter(fricative) |
         std::views::filter(voiceless) |
         std::views::filter([](const auto& p) { return !sibilant(p); });
     for (const auto& f : fricatives) {
-      system.onsets.back().emplace_back();
-      system.onsets.back().back().push_back(s);
-      system.onsets.back().back().push_back(&f);
+      onsets.back().emplace_back();
+      onsets.back().back().push_back(s);
+      onsets.back().back().push_back(&f);
     }
   }
   */
   {  // /s/ plus voiceless stop plus approximant except /r/
-    system.onsets.emplace_back();
-    auto s = system.get_phoneme(IPA::s);
-    auto stops = std::views::all(phons) | std::views::filter(voiceless) |
-                 std::views::filter(stop);
-    auto approximants = std::views::all(phons) |
-                        std::views::filter(approximant) |
-                        std::views::filter(except(IPA::r));
+    onsets.emplace_back();
+    auto s = get_phoneme(IPA::s);
+    auto stops =
+        std::views::all(phonemes) | std::views::filter(voiceless) | std::views::filter(stop);
+    auto approximants = std::views::all(phonemes) | std::views::filter(approximant) |
+                        std::views::filter(except(IPA::ɹ));
     for (const auto& plosive : stops) {
       for (const auto& a : approximants) {
         if (plosive.p.poa == a.p.poa) continue;
-        system.onsets.back().emplace_back();
-        system.onsets.back().back().push_back(s);
-        system.onsets.back().back().push_back(&plosive);
-        system.onsets.back().back().push_back(&a);
+        onsets.back().emplace_back();
+        onsets.back().back().push_back(s);
+        onsets.back().back().push_back(&plosive);
+        onsets.back().back().push_back(&a);
       }
     }
   }
-  //
-  // Nuclei
-  //
+}
+
+void AmericanEnglish::init_nuclei() {
   {
-    system.nuclei.emplace_back();
-    auto candidates = std::views::all(phons) | std::views::filter(vowel);
+    nuclei.emplace_back();
+    auto candidates = std::views::all(phonemes) | std::views::filter(vowel);
     for (const auto& c : candidates) {
-      system.nuclei.back().push_back(&c);
+      nuclei.back().push_back(&c);
     }
   }
-  //
-  // Codas
-  //
+  nuclei_requiring_coda.insert(get_phoneme(IPA::ʊ));
+}
+
+void AmericanEnglish::init_codas() {
   {  // The single consonant phonemes except /h/, /w/, /j/
-    system.codas.emplace_back();
-    auto candidates = std::views::all(phons) | std::views::filter(consonant) |
+    codas.emplace_back();
+    auto candidates = std::views::all(phonemes) | std::views::filter(consonant) |
                       std::views::filter(except({IPA::h, IPA::w, IPA::j}));
     for (const auto& c : candidates) {
-      system.codas.back().emplace_back();
-      system.codas.back().back().push_back(&c);
+      codas.back().emplace_back();
+      codas.back().back().push_back(&c);
     }
   }
   {  // Lateral approximant plus stop or affricate: /lp/,
      // /lb/, /lt/, /ld/, /ltʃ/, /ldʒ/, /lk/
-    system.codas.emplace_back();
-    auto start = system.get_phoneme(IPA::l);
-    auto candidates =
-        std::views::all(phons) | std::views::filter([](const auto& p) {
-          return stop(p) || affricate(p);
-        });
+    codas.emplace_back();
+    auto start = get_phoneme(IPA::l);
+    auto candidates = std::views::all(phonemes) |
+                      std::views::filter([](const auto& p) { return stop(p) || affricate(p); });
     for (const auto& c : candidates) {
-      system.codas.back().emplace_back();
-      system.codas.back().back().push_back(start);
-      system.codas.back().back().push_back(&c);
+      codas.back().emplace_back();
+      codas.back().back().push_back(start);
+      codas.back().back().push_back(&c);
     }
   }
   {  // In rhotic varieties, /r/ plus stop or affricate: /rp/,
      // /rb/, /rt/, /rd/, /rtʃ/, /rdʒ/, /rk/, /rɡ/
-    system.codas.emplace_back();
-    auto start = system.get_phoneme(IPA::r);
-    auto candidates =
-        std::views::all(phons) | std::views::filter([](const auto& p) {
-          return stop(p) || affricate(p);
-        });
+    codas.emplace_back();
+    auto start = get_phoneme(IPA::ɹ);
+    auto candidates = std::views::all(phonemes) |
+                      std::views::filter([](const auto& p) { return stop(p) || affricate(p); });
     for (const auto& c : candidates) {
-      system.codas.back().emplace_back();
-      system.codas.back().back().push_back(start);
-      system.codas.back().back().push_back(&c);
+      codas.back().emplace_back();
+      codas.back().back().push_back(start);
+      codas.back().back().push_back(&c);
     }
   }
   {  // Lateral approximant + fricative except /h/: /lf/, /lv/,
      // /lθ/, /ls/, /lz/, /lʃ/, (/lð/)
-    system.codas.emplace_back();
-    auto start = system.get_phoneme(IPA::l);
-    auto candidates = std::views::all(phons) | std::views::filter(fricative) |
+    codas.emplace_back();
+    auto start = get_phoneme(IPA::l);
+    auto candidates = std::views::all(phonemes) | std::views::filter(fricative) |
                       std::views::filter(except(IPA::h));
     for (const auto& c : candidates) {
-      system.codas.back().emplace_back();
-      system.codas.back().back().push_back(start);
-      system.codas.back().back().push_back(&c);
+      codas.back().emplace_back();
+      codas.back().back().push_back(start);
+      codas.back().back().push_back(&c);
     }
   }
   {  // In rhotic varieties, /r/ + fricative: /rf/, /rv/, /rθ/, /rð/, /rs/,
      // /rz/, /rʃ/
-    system.codas.emplace_back();
-    auto start = system.get_phoneme(IPA::r);
-    auto candidates = std::views::all(phons) | std::views::filter(fricative) |
+    codas.emplace_back();
+    auto start = get_phoneme(IPA::ɹ);
+    auto candidates = std::views::all(phonemes) | std::views::filter(fricative) |
                       std::views::filter(except(IPA::h));
     for (const auto& c : candidates) {
-      system.codas.back().emplace_back();
-      system.codas.back().back().push_back(start);
-      system.codas.back().back().push_back(&c);
+      codas.back().emplace_back();
+      codas.back().back().push_back(start);
+      codas.back().back().push_back(&c);
     }
   }
   {  // Lateral approximant + nasal: /lm/, /ln/
-    system.codas.emplace_back();
-    auto start = system.get_phoneme(IPA::l);
-    auto candidates = std::views::all(phons) | std::views::filter(nasal) |
+    codas.emplace_back();
+    auto start = get_phoneme(IPA::l);
+    auto candidates = std::views::all(phonemes) | std::views::filter(nasal_c) |
                       std::views::filter(except(IPA::ŋ));
     for (const auto& c : candidates) {
-      system.codas.back().emplace_back();
-      system.codas.back().back().push_back(start);
-      system.codas.back().back().push_back(&c);
+      codas.back().emplace_back();
+      codas.back().back().push_back(start);
+      codas.back().back().push_back(&c);
     }
   }
   {  // In rhotic varieties, /r/ + nasal or lateral: /rm/, /rn/, /rl/
-    system.codas.emplace_back();
-    auto start = system.get_phoneme(IPA::r);
-    auto candidates = std::views::all(phons) | std::views::filter(nasal) |
+    codas.emplace_back();
+    auto start = get_phoneme(IPA::ɹ);
+    auto candidates = std::views::all(phonemes) | std::views::filter(nasal_c) |
                       std::views::filter(except(IPA::ŋ));
     for (const auto& c : candidates) {
-      system.codas.back().emplace_back();
-      system.codas.back().back().push_back(start);
-      system.codas.back().back().push_back(&c);
+      codas.back().emplace_back();
+      codas.back().back().push_back(start);
+      codas.back().back().push_back(&c);
     }
-    system.codas.back().emplace_back();
-    system.codas.back().back().push_back(start);
-    system.codas.back().back().push_back(system.get_phoneme(IPA::l));
+    codas.back().emplace_back();
+    codas.back().back().push_back(start);
+    codas.back().back().push_back(get_phoneme(IPA::l));
   }
   {  // Nasal + homorganic stop or affricate: /mp/, /nt/, /nd/, /ntʃ/, /ndʒ/,
      // /ŋk/
-    system.codas.emplace_back();
-    auto start = std::views::all(phons) | std::views::filter(nasal);
-    auto candidates =
-        std::views::all(phons) | std::views::filter([](const auto& p) {
-          return stop(p) || affricate(p);
-        });
+    codas.emplace_back();
+    auto start = std::views::all(phonemes) | std::views::filter(nasal_c);
+    auto candidates = std::views::all(phonemes) |
+                      std::views::filter([](const auto& p) { return stop(p) || affricate(p); });
     for (const auto& s : start) {
       for (const auto& c : candidates) {
         if (!homorganic(&s.p, &c.p)) {
           continue;
         }
-        system.codas.back().emplace_back();
-        system.codas.back().back().push_back(&s);
-        system.codas.back().back().push_back(&c);
+        codas.back().emplace_back();
+        codas.back().back().push_back(&s);
+        codas.back().back().push_back(&c);
       }
     }
   }
 }
+
+std::vector<const Phoneme*> AmericanEnglish::get_onset() const {
+  std::vector<const Phoneme*> onset;
+  int i = rand() % onsets.size();
+  int j = rand() % onsets[i].size();
+  for (auto p : onsets[i][j]) {
+    onset.push_back(p);
+  }
+  return onset;
+}
+
+const Phoneme* AmericanEnglish::get_nucleus(const Phoneme* onset) const {
+  if (auto it = nucleus_index_map.find(onset); it != nucleus_index_map.end()) {
+    std::size_t i = it->second;
+    std::size_t j = rand() % nuclei[i].size();
+    return nuclei[i][j];
+  }
+  std::size_t i = rand() % nuclei.front().size();
+  return nuclei.front()[i];
+}
+
+std::vector<const Phoneme*> AmericanEnglish::get_coda(const Phoneme* nucleus) const {
+  if (rand() % 2 && !nuclei_requiring_coda.contains(nucleus)) {
+    return {};
+  }
+  std::vector<const Phoneme*> coda;
+  std::size_t i = rand() % codas.size();
+  if (auto it = coda_index_map.find(nucleus); it != coda_index_map.end()) {
+    i = it->second;
+  }
+  int j = rand() % codas[i].size();
+  for (auto p : codas[i][j]) {
+    coda.push_back(p);
+  }
+  return coda;
+}
+
+std::string AmericanEnglish::get_spelling(const Syllable& syllable, bool word_final) const {
+  std::string x;
+  Spelling::RuleParams rp;
+  rp.prev = nullptr;
+  rp.word_final = false;
+  for (std::size_t i = 0; i < syllable.onset.size(); ++i) {
+    rp.next = i == syllable.onset.size() - 1 ? &syllable.nucleus->p : &syllable.onset[i + 1]->p;
+    x += syllable.onset[i]->GetSpelling(rp);
+    rp.prev = &syllable.onset[i]->p;
+  }
+
+  if (syllable.coda.size()) {
+    rp.next = &syllable.coda.front()->p;
+  } else {
+    rp.next = nullptr;
+    rp.word_final = word_final;
+  }
+  x += syllable.nucleus->GetSpelling(rp);
+  rp.prev = &syllable.nucleus->p;
+
+  for (std::size_t i = 0; i < syllable.coda.size(); ++i) {
+    if (i == syllable.coda.size() - 1) {
+      rp.next = nullptr;
+      rp.word_final = word_final;
+    } else {
+      rp.next = &syllable.coda[i + 1]->p;
+    }
+    x += syllable.coda[i]->GetSpelling(rp);
+    rp.prev = &syllable.coda[i]->p;
+  }
+
+  return x;
+}
+
+}  // namespace phonology

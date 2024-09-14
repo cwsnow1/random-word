@@ -7,6 +7,7 @@
 #include <ranges>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace phonology {
@@ -230,6 +231,8 @@ class System {
 
   std::unordered_map<const Phoneme*, std::size_t> nucleus_index_map;
   std::unordered_map<const Phoneme*, std::size_t> coda_index_map;
+
+  std::unordered_set<const Phoneme*> nuclei_requiring_coda;
 };
 
 using phone_filter = std::function<bool(const Phoneme&)>;
@@ -272,19 +275,24 @@ inline constexpr phone_filter except(const phonology::IPA exception) {
   return [exception](const auto& p) { return p.p.symbol != exception; };
 }
 
-inline bool any_position([[maybe_unused]] Spelling::RuleParams rp) { return true; }
-inline bool word_final(Spelling::RuleParams rp) { return rp.word_final; };
-inline bool not_word_final(Spelling::RuleParams rp) { return !rp.word_final; }
-inline bool not_in_cluster(Spelling::RuleParams rp) {
+inline bool any_position    ([[maybe_unused]] Spelling::RuleParams rp) { return true; }
+inline bool word_final      (Spelling::RuleParams rp) { return rp.word_final; };
+inline bool not_word_final  (Spelling::RuleParams rp) { return !rp.word_final; }
+inline bool is_onset        (Spelling::RuleParams rp) { return rp.prev == nullptr; }
+inline bool is_coda         (Spelling::RuleParams rp) { return rp.next == nullptr; }
+inline bool not_in_cluster  (Spelling::RuleParams rp) {
   return (rp.prev == nullptr || rp.prev->vowel) && (rp.next == nullptr || rp.next->vowel);
 }
-inline bool word_initial(Spelling::RuleParams rp) { return rp.prev == nullptr; };
+inline bool in_cluster  (Spelling::RuleParams rp) {
+  return !not_in_cluster(rp);
+}
+inline bool word_initial    (Spelling::RuleParams rp) { return rp.prev == nullptr; };
 inline bool not_word_initial(Spelling::RuleParams rp) { return !word_initial(rp); }
-inline bool between_vowels(Spelling::RuleParams rp) {
+inline bool between_vowels  (Spelling::RuleParams rp) {
   return (rp.prev && !rp.word_final && rp.prev->vowel && (rp.next == nullptr));
 }
-inline bool before_vowel(Spelling::RuleParams rp) { return rp.next && rp.next->vowel; }
-inline bool mid_word(Spelling::RuleParams rp) { return rp.prev && !rp.word_final; }
+inline bool before_vowel    (Spelling::RuleParams rp) { return rp.next && rp.next->vowel; }
+inline bool mid_word        (Spelling::RuleParams rp) { return rp.prev && !rp.word_final; }
 
 bool homorganic(const Phone* lhs, const Phone* rhs);
 Phone get_phone(IPA symbol);
